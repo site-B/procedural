@@ -1,65 +1,63 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+// pages/index.js
 
-export default function Home() {
-  return (
-    <div className={styles.container}>
+import { useState, useEffect } from 'react'; 
+import Link from 'next/link'; 
+import Head from 'next/head';
+import firebaseConfig from '../config/firebase-config'; 
+import CreatePost from '../components/CreatePost'; 
+import Register from './users/register'; 
+
+const Home = () => {
+  const [blogs, setBlogs] = useState([]);
+
+  useEffect(() => {
+    firebaseConfig.firestore().collection('blog').onSnapshot(snap => {
+      const blogs = snap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setBlogs(blogs); 
+    });
+  }, []);
+
+  console.log(blogs)
+    return (
+      <div>
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>procedural</title>
       </Head>
+      <h1>procedural</h1>
+        <ul>
+          {blogs.map(blog => 
+          <li key={blog.id}>
+            <Link href='/blog/[id]' as={'/blog/' + blog.id}>
+              <a>
+                {blog.title}
+                <br />
+                {blog.subtitle}
+              </a>
+            </Link>
+          </li>
+          )}
+        </ul>
+      <CreatePost/>
+    </div>
+    )
+}
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+/* const [blogs, setBlogs] = useState([]);
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+const Home = () => {
+  return (
+    <div>
+      <Head>
+        <title>procedural</title>
+      </Head>
+      <h1>procedural</h1>
+      <CreatePost/>
     </div>
   )
-}
+} */
+
+export default Home; 
