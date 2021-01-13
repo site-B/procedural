@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'; 
 import Link from 'next/link'; 
 import Head from 'next/head';
-import firebaseConfig from '../config/firebase-config'; 
+import fire from '../config/firebase-config'; 
 import CreatePost from '../components/CreatePost'; 
 
 
@@ -12,7 +12,7 @@ const Home = () => {
   const [notification, setNotification] = useState('');
   const [loggedIn, setLoggedIn] = useState('');
 
-  firebaseConfig.auth().onAuthStateChanged((user) => {
+  fire.auth().onAuthStateChanged((user) => {
     if (user) {
       setLoggedIn(true)
     } else {
@@ -21,7 +21,7 @@ const Home = () => {
   })
 
   useEffect(() => {
-    firebaseConfig
+    fire
     .firestore()
     .collection('blog')
     .onSnapshot(snap => {
@@ -31,10 +31,11 @@ const Home = () => {
       }));
       setBlogs(blogs); 
     });
-  }, []);
+  }, [])
+  console.log(blogs);
 
   const handleLogout = () => {
-    firebaseConfig.auth().signOut().then(() => {
+    fire.auth().signOut().then(() => {
       setNotification('logged out')
       setTimeout(() => {
         setNotification('')
@@ -43,44 +44,47 @@ const Home = () => {
   }
 
     return (
-      <div>
-      <Head>
-        <title>procedural</title>
-      </Head>
-      <h1>procedural</h1>
-      {notification}
+      <div className='index-container'>
+        <Head>
+          <title>procedural</title>
+        </Head>
+        <div className='index-procedural'>
+          <h1>procedural</h1>
+        </div>
+        {notification}
 
-      {
-        !loggedIn ? 
+        {
+          !loggedIn ? 
+            <div className='index-register-n-login'>
+              <Link href="/users/register">
+                <a>register here</a>
+              </Link>
+              <br /> 
+              <Link href="/users/login">
+                <a>Login</a>
+              </Link>
+            </div>
+            :
+              <button onClick={handleLogout}>Logout</button>
+        }
+
           <div>
-            <Link href="/users/register">
-              <a>register here</a>
-            </Link>
-            <br /> 
-            <Link href="/users/login">
-              <a>Login</a>
-            </Link>
+            {blogs.map(blog => 
+            <p className='post-preview'
+            key={blog.id}>
+              <Link href='/blog/[id]' as={'/blog/' + blog.id}>
+                <a>
+                  {blog.title}
+                  <br />
+                  {blog.subtitle}
+                </a>
+              </Link>
+            </p>
+            )}
           </div>
-          :
-            <button onClick={handleLogout}>Logout</button>
-      }
-
-        <ul>
-          {blogs.map(blog => 
-          <li key={blog.id}>
-            <Link href='/blog/[id]' as={'/blog/' + blog.id}>
-              <a>
-                {blog.title}
-                <br />
-                {blog.subtitle}
-              </a>
-            </Link>
-          </li>
-          )}
-        </ul>
-      {
-        loggedIn && <CreatePost/>
-      }
+        {
+          loggedIn && <CreatePost/>
+        }
     </div>
     )
 }
